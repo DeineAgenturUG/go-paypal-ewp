@@ -1,15 +1,15 @@
 package Ewp
 
 import (
-	"crypto/x509"
 	"crypto/rsa"
-	"encoding/pem"
+	"crypto/x509"
 	"encoding/base64"
+	"encoding/pem"
 	"errors"
 	"io/ioutil"
 	"reflect"
-	"strings"
 	"strconv"
+	"strings"
 
 	"github.com/DeineAgenturUG/pkcs7"
 )
@@ -92,7 +92,7 @@ type Ewp struct {
 
 func NewPaypalEwp(options EwpOptions) *Ewp {
 	var ewp = &Ewp{}
-	ewp.LoadKeyPair(options)
+	ewp.loadKeyPair(options)
 
 	return ewp
 }
@@ -101,7 +101,7 @@ func (pe *Ewp) GetError() error {
 	return pe.error
 }
 
-func (pe *Ewp) LoadKeyPair(options EwpOptions) {
+func (pe *Ewp) loadKeyPair(options EwpOptions) {
 	pe.certificateID = &options.CertificateID
 
 	if options.PaypalCertificateFile != "" {
@@ -144,14 +144,14 @@ func (pe *Ewp) LoadKeyPair(options EwpOptions) {
 		keyPasswd = []byte(options.PrivateKeyPassphrase)
 	}
 
-	pe.privateKey, pe.error = ParseRsaPrivateKeyFromPemStr(keyFilePEM, &keyPasswd)
+	pe.privateKey, pe.error = parseRsaPrivateKeyFromPemStr(keyFilePEM, &keyPasswd)
 }
 
 func (pe *Ewp) Generate(data *CryptData) string {
 	var encData []string
 	var output []byte
 
-	encData = append(encData, "cert_id=" + *pe.certificateID)
+	encData = append(encData, "cert_id="+*pe.certificateID)
 
 	rt := reflect.TypeOf(data)
 	// Check if it's a pointer
@@ -198,7 +198,7 @@ func (pe *Ewp) Generate(data *CryptData) string {
 		}
 
 		if s == "" {
-			s = tagVals["DEFAULT"];
+			s = tagVals["DEFAULT"]
 		}
 
 		encData = append(encData, tagVals["NAME"]+"="+s)
@@ -241,7 +241,7 @@ func (pe *Ewp) Generate(data *CryptData) string {
 	return "-----BEGIN PKCS7-----\n" + chunkSplit(base64.StdEncoding.EncodeToString(output), 64, "\n") + "-----END PKCS7-----"
 }
 
-func ParseRsaPrivateKeyFromPemStr(privatePEM []byte, passphrase *[]byte) (*rsa.PrivateKey, error) {
+func parseRsaPrivateKeyFromPemStr(privatePEM []byte, passphrase *[]byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(privatePEM)
 	if block == nil {
 		return nil, errors.New("failed to parse PEM block containing the key")
