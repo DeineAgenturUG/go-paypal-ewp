@@ -9,10 +9,9 @@ import (
 	"io/ioutil"
 	"reflect"
 	"strings"
-	"fmt"
-
-	"github.com/fullsailor/pkcs7"
 	"strconv"
+
+	"github.com/DeineAgenturUG/pkcs7"
 )
 
 const tagName = "ppewp"
@@ -178,7 +177,6 @@ func (pe *Ewp) Generate(data *CryptData) string {
 
 		var s string
 		switch kind {
-
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			s = strconv.FormatInt(reflect.ValueOf(data).Elem().Field(i).Int(), 10)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -194,6 +192,7 @@ func (pe *Ewp) Generate(data *CryptData) string {
 		case reflect.String:
 			s = reflect.ValueOf(data).Elem().Field(i).String()
 		}
+
 		if _, ok := tagVals["OMITEMPTY"]; ok && s == "" {
 			continue
 		}
@@ -204,13 +203,13 @@ func (pe *Ewp) Generate(data *CryptData) string {
 
 		encData = append(encData, tagVals["NAME"]+"="+s)
 
-		fmt.Printf("%s (%v) = %#v >> %#v\n", reflect.ValueOf(data).Elem().Field(i).Type().Name(), kind, tagVals, s)
+		//fmt.Printf("%s (%v) = %#v >> %#v\n", reflect.ValueOf(data).Elem().Field(i).Type().Name(), kind, tagVals, s)
 
 	}
 
 	encFilled := strings.Join(encData, "\n")
 
-	fmt.Printf("%#v\n\n", encFilled)
+	//fmt.Printf("%#v\n\n", encFilled)
 
 	signedData, err := pkcs7.NewSignedData([]byte(encFilled))
 	if err != nil {
